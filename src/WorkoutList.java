@@ -1,0 +1,280 @@
+
+/*
+ * LINKED LIST
+ */
+public class WorkoutList {
+	
+	
+	
+	// MARK: Instance Variables
+	private WorkoutList next;
+	private final Workout workout;
+
+	
+	
+	// MARK: Constructor(s)
+	public WorkoutList(Workout workout, WorkoutList next) {
+		this.workout = workout;
+		this.next = next;
+	}
+	
+	
+	
+	// MARK: Getters
+	public Workout getWorkout() {
+		return this.workout;
+	}
+	
+	
+	
+	// MARK: Setters
+	
+	
+	
+	// MARK: Instance Methods
+
+	// TO STRING
+	// Wrapper
+	public String toString() {
+		return this.toString(0);
+	}
+	private String toString(int i) { // 'i' is for the numbering when the work-outs are displayed
+		if (this.next == null) 	return i + ") " + this.workout.toString();
+		else 					return i + ") " + this.workout.toString() + this.next.toString(i + 1);
+	}
+
+	
+	// NUMBER OF ELEMENTS IN LIST
+	public int getSize() {
+		if (this.next == null) return 1;
+		else return 1 + next.getSize();
+	}
+
+	
+	/* ADD METHOD
+	 * Push new work-outs to the top of the list. (since work-outs are to be maintained with
+	 * newest work-outs at the head of the list)
+	 */
+	public WorkoutList add(Workout workout) { 
+		WorkoutList newHead = new WorkoutList(workout, this);
+		return newHead;
+	}
+	
+	
+	/* REMOVE METHOD
+	 * Wrapper
+	 */
+	public WorkoutList removeObjectAtIndex(int indexToDelete) {
+		return this.removeObjectAtIndex(0, indexToDelete, null, this);
+	}
+	// Find the index to delete, then set the next properties of the surrounding elements 
+	private WorkoutList removeObjectAtIndex(int i, int indexToDelete, WorkoutList prev, WorkoutList original) {
+		// at the index to delete
+		if (i == indexToDelete) {
+			
+			// if prev == null, at beginning of list
+			if (prev == null) { 
+				
+				// if the next is also null, the list will be empty
+				if (this.next == null) return null;
+				else return this.next; // if next is not null, then only return the next element
+			} else {
+				
+				// prev is not null
+				if (this.next == null) {
+					
+					// if prev is not null, and the next is null, set the prev.next to null
+					prev.next = null;
+					return original;
+				} else {
+					
+					 // this.next is not null, set prev.next to this.next (skip the current element)
+					prev.next = this.next;
+					return original;
+				}	
+			}
+		} else {
+			// not at the index to delete set the prev for the next recursive call
+			prev = this;
+			return this.next.removeObjectAtIndex(i + 1, indexToDelete, prev, original); // recursive call
+		}
+	}
+	
+	
+	/* GET WORKOUTS WITH BUDDY
+	 * Returns a new linked list of work-outs with only work-outs performed with this buddy
+	 */
+	public WorkoutList getWorkoutsWithBuddy( String workoutBuddyName, WorkoutList temp) {
+		if (this.next == null) {
+			if (this.getWorkout().getWorkoutBuddyName().equalsIgnoreCase(workoutBuddyName)) {
+				if (temp == null) return temp = new WorkoutList(this.getWorkout(), null);
+			    else return (temp = temp.add( this.getWorkout() ) );
+			} else { 
+				return temp;
+			}
+		} else {
+			if (this.getWorkout().getWorkoutBuddyName().equalsIgnoreCase(workoutBuddyName)) {
+				// if temp is null... then this will be the only entry... so use the new Workout...
+				if (temp == null) temp = new WorkoutList(this.getWorkout(), null);
+				else temp = temp.add(this.getWorkout());
+				
+				// recursive call ... keep searching
+				return this.next.getWorkoutsWithBuddy(workoutBuddyName, temp);
+			} else {
+				// recursive call ... keep searching 
+				return this.next.getWorkoutsWithBuddy(workoutBuddyName, temp);
+			}
+		}
+	}
+	
+	
+	/* GET WORKOUTS FOR LOCATION (not sorted by rating)
+	 * Returns a new linked list of work-outs with only work-outs performed at this location
+	 */
+	public WorkoutList getWorkoutsAtLocation(String location, WorkoutList temp) {
+		if (this.next == null) {
+			if (this.getWorkout().getLocation().equalsIgnoreCase(location)) {
+				if (temp == null) return temp = new WorkoutList(this.getWorkout(), null);
+				else return (temp = temp.add( this.getWorkout() ) );
+			} else { 
+				return temp;
+			}
+		} else {
+			if (this.getWorkout().getLocation().equalsIgnoreCase(location)) {
+				// if temp is null... then this will be the only entry... so use the new Workout...
+				if (temp == null) temp = new WorkoutList(this.getWorkout(), null);
+			    else temp = temp.add(this.getWorkout());
+				
+				// recursive call ... keep searching
+				return this.next.getWorkoutsAtLocation(location, temp);
+			} else {
+				// recursive call ... keep searching 
+				return this.next.getWorkoutsAtLocation(location, temp);
+			}
+		}
+	}
+	
+	
+	/* GET SORTED LINKED LIST OF WORKOUTS AT LOCATION
+	 * Wrapper
+	 */
+	public WorkoutList getSortedWorkoutsAtLocation(String location) {
+		
+		// Get a non sorted linked list of work-outs at location.
+		WorkoutList tempList = null;
+		tempList = this.getWorkoutsAtLocation( location, tempList );
+		
+		return tempList.getSortedWorkoutsAtLocation( tempList.getSize() );
+	}
+	// Returns a linked list of work-outs at this certain location
+	private WorkoutList getSortedWorkoutsAtLocation(int size) {
+		
+		// make an array of Work-outs.
+		Workout[] arrayOfWorkouts = new Workout[size];
+		fillArray(arrayOfWorkouts, this, 0, size);
+		
+		// sort the array of work-outs (using selection sort)
+		sort(arrayOfWorkouts, 0, size - 1);
+		
+		// convert the array of work-outs into an linked list
+		WorkoutList temp = null;
+		temp = getWorkoutListFromArray(temp, arrayOfWorkouts, 0,size -1);
+		
+		// return the linkedList
+		return temp;
+	}
+
+	
+	/*
+	 *  GET PB FOR WORKOUT WITH BEST TIME AT MILEAGE
+	 */
+	public Workout searchForPBatMileage(double mileage) {
+		if (this.next == null) {
+			// @ end of list, return the work-out if the mileage matches
+			if (this.workout.getMilesCovered() == mileage) return this.getWorkout();
+			else return null;
+		} else {
+			// recursively find the work-out with the matching mileage and least duration
+			if (this.workout.getMilesCovered() == mileage && (this.getWorkout().getDuration() < this.next.getWorkout().getDuration()))
+				return this.getWorkout();
+			else return this.next.searchForPBatMileage(mileage);
+		}
+	}
+	
+	
+	/*
+	 * GET WORKOUT AT INDEX
+	 */
+	public Workout getWorkoutAt(int i, int index) {
+		if (i == index) return this.getWorkout();
+		else return this.next.getWorkoutAt(i + 1, index);
+	}
+
+	
+	
+	// MARK: Static Methods
+	
+	/*
+	 *  CONVERT AN ARRAY TO A LINKED LIST
+	 */
+	private static WorkoutList getWorkoutListFromArray(WorkoutList temp, Workout[] arrayOfWorkouts, int lo, int hi) {
+		if (lo == hi) {
+			if (temp == null) return temp = new WorkoutList(arrayOfWorkouts[lo], null);
+			else return (temp = temp.add( arrayOfWorkouts[lo] ) );
+		} else {
+			if (temp == null) temp = new WorkoutList(arrayOfWorkouts[lo], null);
+			else temp = temp.add(arrayOfWorkouts[lo]);
+			
+			return getWorkoutListFromArray(temp, arrayOfWorkouts, lo + 1, hi );	 
+		}
+	}
+	
+	
+	/*
+	 *  FILL AN ARRAY WITH ELEMENTS FROM A LINKED LIST
+	 */
+	public static void fillArray(Workout[] arrayOfWorkouts, WorkoutList linkedListOfWorkouts, int i, int length) {
+		if (i < length) {
+			arrayOfWorkouts[i] = linkedListOfWorkouts.getWorkoutAt(0, i);
+			fillArray(arrayOfWorkouts, linkedListOfWorkouts, i + 1, length);
+		}
+	}
+	
+	
+	/*
+	 *  SELECTION SORT
+	 */
+	public static void sort(Workout[] workouts, int lo, int hi) {
+		if (lo < hi) {
+			swap(workouts, lo, findMinIndex(workouts, lo, hi) );
+			sort(workouts, lo + 1, hi);
+		}
+	}
+	
+	
+	/*
+	 *  SWAO
+	 */
+	public static void swap(Workout[] workouts, int i, int j) {
+		Workout temp = workouts[i];
+		workouts[i] = workouts[j];
+		workouts[j] = temp;
+	}
+	
+	
+	/*
+	 *  FIND INDEX OF MIN
+	 */
+	public static int findMinIndex(Workout[] workouts, int lo, int hi) {
+		if (lo == hi) return lo;
+		
+		int result = findMinIndex(workouts, lo + 1, hi);
+		
+		if (workouts[lo].getRating() <= workouts[result].getRating()) return lo;
+		
+		return result;
+	}
+	
+	
+	
+} // end class

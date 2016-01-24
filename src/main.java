@@ -1,0 +1,139 @@
+
+public class main {
+	
+	
+	
+	// MARK: Global Variables
+	
+	private static WorkoutList head = null;
+	
+	
+	// User options to select
+	private static final int ADD = 1, REMOVE = 2, DISPLAY_ALL = 3, DISPLAY_ALL_BUDDY = 4, DISPLAY_ALL_LOCATION = 5, PB = 6;
+	
+	
+	// Continue running program condition
+	private static boolean continueLoop = true;
+
+	
+	
+	// MARK: Main Method
+	
+	public static void main(String[] args) {
+		
+		do {
+			// Present the user with options and get their selection
+			Console_Controller_Output.displayOptions();
+			int selection = Console_Controller_Input.getSelectedOption();
+			
+			
+			
+			// MARK: ADD Selected
+			
+			if ( selection == ADD ) {
+				// Get the work-out to add
+				Workout workoutToAdd = Console_Controller_Input.getWorkoutToAdd();
+				
+				// Save the work-out
+				if ( head != null ) head = head.add(workoutToAdd);
+				else head = new WorkoutList(workoutToAdd, null);
+			}
+			
+			
+			
+			// MARK: REMOVE Selected
+			
+			else if ( selection == REMOVE ) {
+				if ( head != null ) {
+					// Display all work-outs in the D.B.
+					Console_Controller_Output.display(head.toString());
+					// Get index the user wants to delete
+					int indexToDelete = Console_Controller_Input.getIndexToDelete( head.getSize() );
+					// Delete the work-out the user wants to delete
+					head = head.removeObjectAtIndex( indexToDelete );
+					
+					// If there are still work-outs left in the D.B. after deletion... display the updated List
+					if ( head != null ) Console_Controller_Output.display( head.toString() );
+					else Console_Controller_Output.emptyListAlert();
+				} else Console_Controller_Output.emptyListAlert();
+			}
+			
+			
+			
+			// MARK: DISPLAY ALL Selected
+			
+			else if ( selection == DISPLAY_ALL ) {
+				// If there are Work-outs in the DB, then display them all.
+				if ( head != null ) Console_Controller_Output.display( head.toString() );
+				else Console_Controller_Output.emptyListAlert();
+			}
+			
+			
+			
+			// MARK: DISPLAY ALL WITH BUDDY Selected 
+			
+			else if ( selection == DISPLAY_ALL_BUDDY ) {
+				if ( head != null ) {
+					// Ask the user for the buddy they want to search for
+					String workoutBuddy = Console_Controller_Input.askForWorkoutBuddyName();
+					
+					// Make a new list with only the work-outs with this certain buddy
+					WorkoutList tempList = null;
+					tempList = head.getWorkoutsWithBuddy( workoutBuddy, tempList );
+					
+					// If the list has items in it, then display the list
+					if ( tempList != null ) Console_Controller_Output.display( tempList.toString() );
+					else Console_Controller_Output.emptyListAlert();
+				} else Console_Controller_Output.emptyListAlert();	
+			}
+
+			
+			
+			// MARK: DISPLAY ALL AT LOCATION IN RANK ORDER Selected
+			
+			else if ( selection == DISPLAY_ALL_LOCATION ) {
+				if ( head != null ) {
+					// Ask the user for the location they want to search for
+					String location = Console_Controller_Input.askForLocation();
+					
+					// Get sorted list of work-outs at this certain location
+					WorkoutList sortedTempList = null;
+					sortedTempList = head.getSortedWorkoutsAtLocation(location);
+					
+					// If the list has items in it, then display the list
+					if ( sortedTempList != null ) Console_Controller_Output.display( sortedTempList.toString() );
+					else Console_Controller_Output.emptyListAlert();
+				} else Console_Controller_Output.emptyListAlert();	
+			}
+
+			
+			
+			// MARK: DISPLAY PB FOR MILEAGE Selected
+			
+			else if ( selection == PB ) {
+				if ( head != null ) {
+					// Ask the user for the location they want to search for
+					double mileage = Console_Controller_Input.askForMileage();
+					
+					// Get the workout wiht the best time for this certain mileage
+					Workout pb = head.searchForPBatMileage(mileage);
+					
+					// If the list has items in it, then display the list
+					if ( pb != null ) Console_Controller_Output.display( pb.toString() );
+					else Console_Controller_Output.emptyListAlert();
+				} else Console_Controller_Output.emptyListAlert();	
+			}
+			
+			
+			
+			// MARK: QUIT Selected
+			
+			else { continueLoop = Console_Controller_Input.askIfUserWantsToQuit(); } // Ask the user if they want to Quit or Continue
+		
+		} while( continueLoop ); // Continue, if user wanted to... otherwise end the program.
+		
+	} // end main
+	
+	
+	
+} // end class
